@@ -63,7 +63,6 @@ def generate_desc_txt(filepath, width, height, fps, parts):
 
 
 def build_bootanimation_zip(source_dir, output_zip_path):
-  """Wajib menggunakan ZIP_STORED (tanpa kompresi) agar Android dapat membaca animasi."""
   with zipfile.ZipFile(output_zip_path, "w", zipfile.ZIP_STORED) as zipf:
     for root, _, files in os.walk(source_dir):
       for file in sorted(files):
@@ -73,7 +72,6 @@ def build_bootanimation_zip(source_dir, output_zip_path):
 
 
 def build_magisk_module(bootanim_zip_path, output_module_path, mod_id, name):
-  """Membungkus bootanimation.zip menjadi modul Magisk / KernelSU."""
   with tempfile.TemporaryDirectory() as temp_dir:
     prop_content = f"""id={mod_id}
 name={name}
@@ -113,7 +111,6 @@ def main():
       " loop, closing)",
   )
 
-  # Input video
   parser.add_argument(
       "--video",
       help="Path video tunggal untuk mode 'loop'",
@@ -131,7 +128,6 @@ def main():
       help="Path video closing/outro untuk mode '3stage'",
   )
 
-  # Konfigurasi Output
   parser.add_argument(
       "-o",
       "--output",
@@ -180,7 +176,6 @@ def main():
       width, height, fps = extract_frames(
           args.video, part0_dir, target_fps=args.fps, target_size=target_size
       )
-      # 'p' = part loop, '0' = loop infinite, '0' = pause 0 frame
       parts_config.append(("p", 0, 0, "part0"))
 
     elif args.mode == "3stage":
@@ -191,14 +186,12 @@ def main():
         )
         return
 
-      # 1. Opening (Diputar 1x penuh)
       part0_dir = os.path.join(work_dir, "part0")
       w0, h0, fps0 = extract_frames(
           args.opening, part0_dir, target_fps=args.fps, target_size=target_size
       )
       parts_config.append(("c", 1, 0, "part0"))
 
-      # 2. Looping (Diputar terus menerus selama booting)
       part1_dir = os.path.join(work_dir, "part1")
       w1, h1, _ = extract_frames(
           args.loop_video,
@@ -208,7 +201,6 @@ def main():
       )
       parts_config.append(("p", 0, 0, "part1"))
 
-      # 3. Closing (Diputar 1x saat booting selesai)
       part2_dir = os.path.join(work_dir, "part2")
       w2, h2, _ = extract_frames(
           args.closing, part2_dir, target_fps=args.fps, target_size=target_size
@@ -217,11 +209,9 @@ def main():
 
       width, height, fps = w0, h0, fps0
 
-    # Buat desc.txt
     desc_path = os.path.join(work_dir, "desc.txt")
     generate_desc_txt(desc_path, width, height, fps, parts_config)
 
-    # Buat bootanimation.zip temporary atau final
     temp_bootanim_zip = (
         os.path.join(work_dir, "bootanimation_raw.zip")
         if args.magisk
@@ -231,7 +221,6 @@ def main():
     print("[+] Membuat bootanimation.zip (Uncompressed STORED)...")
     build_bootanimation_zip(work_dir, temp_bootanim_zip)
 
-    # Jika user memilih output Modul Magisk/KernelSU
     if args.magisk:
       mod_output = (
           args.output
