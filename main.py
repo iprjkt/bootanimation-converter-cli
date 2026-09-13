@@ -83,7 +83,7 @@ description=Custom bootanimation module generated via Bootanimation Converter.
     with open(os.path.join(temp_dir, "module.prop"), "w", newline="\n") as f:
       f.write(prop_content)
 
-    system_media_dir = os.path.join(temp_dir, "system", "media")
+    system_media_dir = os.path.join(temp_dir, "system", "product", "media")
     os.makedirs(system_media_dir, exist_ok=True)
     shutil.copy(
         bootanim_zip_path, os.path.join(system_media_dir, "bootanimation.zip")
